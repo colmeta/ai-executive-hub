@@ -1,4 +1,4 @@
-// app/api/orchestrator/route.ts
+// src/app/api/orchestrator/route.ts
 
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
@@ -44,10 +44,9 @@ export async function POST(req: NextRequest) {
     console.log(`Task logged with ID: ${taskId}`);
 
     // 2. Process the task with OpenAI (Simple text generation for now)
-    // In the future, this is where we will add routing logic to different agents.
     console.log('Step 2: Processing with OpenAI');
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // Cost-effective for initial build
+      model: 'gpt-3.5-turbo',
       messages: [
         { role: 'system', content: 'You are a helpful executive assistant.' },
         { role: 'user', content: prompt },
@@ -65,7 +64,6 @@ export async function POST(req: NextRequest) {
 
     if (updateError) {
       console.error('Supabase update error:', updateError);
-      // The task is processed, but we failed to log the result. Critical to handle.
       throw new Error('AI processing complete, but failed to update log.');
     }
     
@@ -75,7 +73,6 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('An error occurred in the orchestrator:', error);
     
-    // If we have a taskId, try to log the error to the database
     if (taskId!) {
         await supabase
             .from('tasks')
