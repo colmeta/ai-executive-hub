@@ -1,5 +1,3 @@
-// src/app/api/orchestrator/route.ts
-
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
