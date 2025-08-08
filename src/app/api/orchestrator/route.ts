@@ -18,7 +18,7 @@ const openai = new OpenAI({
 export async function POST(req: NextRequest) {
   console.log('Orchestrator endpoint hit');
 
-  let taskId: string;
+  let taskId: string | undefined;
 
   try {
     const body = await req.json();
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     taskId = taskData.id;
     console.log(`Task logged with ID: ${taskId}`);
 
-    // 2. Process the task with OpenAI (Simple text generation for now)
+    // 2. Process the task with OpenAI
     console.log('Step 2: Processing with OpenAI');
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -70,16 +70,21 @@ export async function POST(req: NextRequest) {
     console.log('Task completed successfully');
     return NextResponse.json({ success: true, taskId: taskId, response: aiResponse }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) { // <-- THE FIX IS HERE!
     console.error('An error occurred in the orchestrator:', error);
     
-    if (taskId!) {
+    let errorMessage = 'An unknown error occurred.';
+    if (error instanceof Error) {
+        errorMessage = error.message;
+    }
+
+    if (taskId) {
         await supabase
             .from('tasks')
-            .update({ status: 'error', error_message: error.message })
+            .update({ status: 'error', error_message: errorMessage })
             .eq('id', taskId);
     }
 
-    return NextResponse.json({ error: 'An internal server error occurred.', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An internal server error occurred.', details: errorMessage }, { status: 500 });
   }
 }
