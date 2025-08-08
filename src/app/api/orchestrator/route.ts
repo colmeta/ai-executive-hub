@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     console.log('Task completed successfully');
     return NextResponse.json({ success: true, taskId: taskId, response: aiResponse }, { status: 200 });
 
-  } catch (error) { // <-- THE FIX IS HERE!
+  } catch (error) {
     console.error('An error occurred in the orchestrator:', error);
     
     let errorMessage = 'An unknown error occurred.';
